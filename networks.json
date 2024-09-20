@@ -2,7 +2,15 @@
   "base": {
     "Contract": {
       "address": "0x589302b32b60434470C47898905eBe1ADA67E151",
-      "startBlock": 19933405
+      "startBlock": 19974046 
+    },
+    "Contract2": {
+      "address": "0x8F6cE0159101040045812bD646d74ef80b0C9bC8",
+      "startBlock": 19974046 
+    },
+    "Contract3": {
+      "address": "0xb51658dD0d05F4a7c038c3035f6cC839e8378c32",
+      "startBlock": 19974046 
     }
   }
 }

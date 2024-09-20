@@ -1,10 +1,33 @@
+type Community @entity {
+  id: ID!
+  communityId: BigInt!
+  name: String!
+  description: String!
+  imageUrl: String!
+  games: [String!]!
+  currentGame: String!
+  state: BigInt!
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  transactionHash: Bytes!
+}
+
 type CommunityCreated @entity(immutable: true) {
   id: Bytes!
-  communityId: BigInt! # uint256
-  name: String! # string
-  description: String! # string
-  imageUrl: String! # string
-  games: String! # string
+  communityId: BigInt!
+  name: String!
+  description: String!
+  imageUrl: String!
+  games: String!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type CommunityStateChanged @entity(immutable: true) {
+  id: Bytes!
+  communityId: BigInt!
+  newState: Int!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -12,7 +35,7 @@ type CommunityCreated @entity(immutable: true) {
 
 type Initialized @entity(immutable: true) {
   id: Bytes!
-  version: BigInt! # uint64
+  version: BigInt!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -20,8 +43,8 @@ type Initialized @entity(immutable: true) {
 
 type OwnershipTransferred @entity(immutable: true) {
   id: Bytes!
-  previousOwner: Bytes! # address
-  newOwner: Bytes! # address
+  previousOwner: Bytes!
+  newOwner: Bytes!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -29,7 +52,56 @@ type OwnershipTransferred @entity(immutable: true) {
 
 type Upgraded @entity(immutable: true) {
   id: Bytes!
-  implementation: Bytes! # address
+  implementation: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SubmissionToContributionTransition @entity(immutable: true) {
+  id: Bytes!
+  idWeek: String!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ContributionSubmitted @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes!
+  communityId: BigInt!
+  weekNumber: BigInt!
+  contributionIds: [String!]!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Contribution @entity {
+  id: ID!
+  name: String!
+  description: String!
+  links: [String!]!
+}
+
+type NewGroupsCreated @entity(immutable: true) {
+  id: Bytes!
+  eventId: String!
+  contributionStrings: [String!]!
+  rankingStrings: [String!]!
+  memberAddresses: [String!]!  # Changed from [[Bytes!]!]! to [String!]!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RespectUpdated @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes!
+  communityId: BigInt!
+  weekNumber: BigInt!
+  respectAmount: BigInt!
+  averageRespect: BigInt!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

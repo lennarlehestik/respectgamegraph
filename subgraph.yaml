@@ -1,6 +1,4 @@
-specVersion: 1.0.0
-indexerHints:
-  prune: auto
+specVersion: 0.0.5
 schema:
   file: ./schema.graphql
 dataSources:
@@ -10,12 +8,13 @@ dataSources:
     source:
       address: "0x589302b32b60434470C47898905eBe1ADA67E151"
       abi: Contract
-      startBlock: 19933405
+      startBlock: 19974046 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
+        - Community
         - CommunityCreated
         - Initialized
         - OwnershipTransferred
@@ -33,3 +32,70 @@ dataSources:
         - event: Upgraded(indexed address)
           handler: handleUpgraded
       file: ./src/contract.ts
+  - kind: ethereum
+    name: Contract2
+    network: base
+    source:
+      address: "0x8F6cE0159101040045812bD646d74ef80b0C9bC8"
+      abi: Contract2
+      startBlock: 19974046 
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - CommunityStateChanged
+        - Initialized
+        - OwnershipTransferred
+        - SubmissionToContributionTransition
+        - Upgraded
+      abis:
+        - name: Contract2
+          file: ./abis/Contract2.json
+      eventHandlers:
+        - event: CommunityStateChanged(indexed uint256,uint8)
+          handler: handleCommunityStateChanged
+        - event: Initialized(uint64)
+          handler: handleInitialized
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: SubmissionToContributionTransition(string)
+          handler: handleSubmissionToContributionTransition
+        - event: Upgraded(indexed address)
+          handler: handleUpgraded
+      file: ./src/contract-2.ts
+  - kind: ethereum
+    name: Contract3
+    network: base
+    source:
+      address: "0xb51658dD0d05F4a7c038c3035f6cC839e8378c32"
+      abi: Contract3
+      startBlock: 19974046
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ContributionSubmitted
+        - Initialized
+        - NewGroupsCreated
+        - OwnershipTransferred
+        - RespectUpdated
+        - Upgraded
+      abis:
+        - name: Contract3
+          file: ./abis/Contract3.json
+      eventHandlers:
+        - event: ContributionSubmitted(indexed address,indexed uint256,uint256,(string,string,string[])[])
+          handler: handleContributionSubmitted
+        - event: Initialized(uint64)
+          handler: handleInitialized
+        - event: NewGroupsCreated(string,string[],string[],string[])
+          handler: handleNewGroupsCreated
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RespectUpdated(indexed address,indexed uint256,uint256,uint256,uint256)
+          handler: handleRespectUpdated
+        - event: Upgraded(indexed address)
+          handler: handleUpgraded
+      file: ./src/contract-3.ts
