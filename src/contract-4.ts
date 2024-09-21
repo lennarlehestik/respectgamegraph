@@ -41,12 +41,11 @@ export function handleConsensusReached(event: ConsensusReachedEvent): void {
 }
 
 export function handleRankingSubmitted(event: RankingSubmittedEvent): void {
-  let entity = new RankingSubmitted(
-    event.params.eventId
-  )
+  let entityId = event.params.eventId
+  let entity = new RankingSubmitted(entityId)
+  
   entity.eventId = event.params.eventId
   entity.ranking = event.params.ranking
-
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -59,13 +58,7 @@ export function handleRankingSubmitted(event: RankingSubmittedEvent): void {
     let communityId = parts[0].trim()
     let community = Community.load(communityId)
     if (community) {
-      // Update community state or other relevant data
-      // For example, you might want to increment a counter for submitted rankings
-      if (community.submittedRankingsCount) {
-        community.submittedRankingsCount = community.submittedRankingsCount + 1
-      } else {
-        community.submittedRankingsCount = 1
-      }
+      // You might want to update other community data here if needed
       community.save()
     } else {
       log.warning('Community not found when updating ranking submission: {}', [communityId])
