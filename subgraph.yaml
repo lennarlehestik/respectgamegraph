@@ -82,11 +82,12 @@ dataSources:
         - OwnershipTransferred
         - RespectUpdated
         - Upgraded
+        - WeeklyGroupsCreated
       abis:
         - name: Contract3
           file: ./abis/Contract3.json
       eventHandlers:
-        - event: ContributionSubmitted(indexed address,indexed uint256,uint256,(string,string,string[])[])
+        - event: ContributionSubmitted(string,(string,string,string[])[])
           handler: handleContributionSubmitted
         - event: Initialized(uint64)
           handler: handleInitialized
@@ -98,4 +99,29 @@ dataSources:
           handler: handleRespectUpdated
         - event: Upgraded(indexed address)
           handler: handleUpgraded
+        - event: WeeklyGroupsCreated(string,string[],string[],string)
+          handler: handleWeeklyGroupsCreated
       file: ./src/contract-3.ts
+  - kind: ethereum
+    name: Contract4
+    network: base
+    source:
+      address: "0xe0DF8059637EEB20464Faa169227DFeA819c36d7"
+      abi: Contract4
+      startBlock: 19974046
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ConsensusReached
+        - RankingSubmitted
+      abis:
+        - name: Contract4
+          file: ./abis/Contract4.json
+      eventHandlers:
+        - event: ConsensusReached(string,string[])
+          handler: handleConsensusReached
+        - event: RankingSubmitted(string,string[])
+          handler: handleRankingSubmitted
+      file: ./src/contract-4.ts

@@ -117,22 +117,10 @@
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "communityId",
-				"type": "uint256"
-			},
-			{
 				"indexed": false,
-				"internalType": "uint256",
-				"name": "weekNumber",
-				"type": "uint256"
+				"internalType": "string",
+				"name": "contributionId",
+				"type": "string"
 			},
 			{
 				"components": [
@@ -413,6 +401,37 @@
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "communityAndWeekId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string[]",
+				"name": "roomIds",
+				"type": "string[]"
+			},
+			{
+				"indexed": false,
+				"internalType": "string[]",
+				"name": "roomIdentifiers",
+				"type": "string[]"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "weekNumber",
+				"type": "string"
+			}
+		],
+		"name": "WeeklyGroupsCreated",
+		"type": "event"
 	},
 	{
 		"inputs": [

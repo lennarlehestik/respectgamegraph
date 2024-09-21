@@ -10,10 +10,12 @@ type Community @entity {
   createdAt: BigInt!
   createdAtBlock: BigInt!
   transactionHash: Bytes!
+  latestConsensus: String
+  submittedRankingsCount: Int
 }
 
 type CommunityCreated @entity(immutable: true) {
-  id: Bytes!
+  id: ID!
   communityId: BigInt!
   name: String!
   description: String!
@@ -25,7 +27,7 @@ type CommunityCreated @entity(immutable: true) {
 }
 
 type CommunityStateChanged @entity(immutable: true) {
-  id: Bytes!
+  id: ID!
   communityId: BigInt!
   newState: Int!
   blockNumber: BigInt!
@@ -34,7 +36,7 @@ type CommunityStateChanged @entity(immutable: true) {
 }
 
 type Initialized @entity(immutable: true) {
-  id: Bytes!
+  id: ID!
   version: BigInt!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -42,7 +44,7 @@ type Initialized @entity(immutable: true) {
 }
 
 type OwnershipTransferred @entity(immutable: true) {
-  id: Bytes!
+  id: ID!
   previousOwner: Bytes!
   newOwner: Bytes!
   blockNumber: BigInt!
@@ -51,7 +53,7 @@ type OwnershipTransferred @entity(immutable: true) {
 }
 
 type Upgraded @entity(immutable: true) {
-  id: Bytes!
+  id: ID!
   implementation: Bytes!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -59,7 +61,7 @@ type Upgraded @entity(immutable: true) {
 }
 
 type SubmissionToContributionTransition @entity(immutable: true) {
-  id: Bytes!
+  id: ID!
   idWeek: String!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -67,11 +69,9 @@ type SubmissionToContributionTransition @entity(immutable: true) {
 }
 
 type ContributionSubmitted @entity(immutable: true) {
-  id: Bytes!
-  user: Bytes!
-  communityId: BigInt!
-  weekNumber: BigInt!
-  contributionIds: [String!]!
+  id: ID!
+  contributionId: String!
+  contributions: [Contribution!]!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -85,23 +85,52 @@ type Contribution @entity {
 }
 
 type NewGroupsCreated @entity(immutable: true) {
-  id: Bytes!
+  id: ID!
   eventId: String!
   contributionStrings: [String!]!
   rankingStrings: [String!]!
-  memberAddresses: [String!]!  # Changed from [[Bytes!]!]! to [String!]!
+  memberAddresses: [String!]!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
 
 type RespectUpdated @entity(immutable: true) {
-  id: Bytes!
+  id: ID!
   user: Bytes!
   communityId: BigInt!
   weekNumber: BigInt!
   respectAmount: BigInt!
   averageRespect: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type WeeklyGroupsCreated @entity(immutable: true) {
+  id: ID!
+  communityAndWeekId: String!
+  roomIds: [String!]!
+  roomIdentifiers: [String!]!
+  weekNumber: String!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ConsensusReached @entity(immutable: true) {
+  id: ID!
+  compositeId: String!
+  finalRanking: [String!]!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RankingSubmitted @entity(immutable: true) {
+  id: ID!
+  eventId: String!
+  ranking: [String!]!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
