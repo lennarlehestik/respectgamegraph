@@ -73,6 +73,7 @@ type SubmissionToContributionTransition @entity(immutable: true) {
 type ContributionSubmitted @entity {
   id: String!
   contributionId: String!
+  room: NewGroupsCreated!
   contributions: [Contribution!]!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -86,7 +87,7 @@ type Contribution @entity {
   links: [String!]!
 }
 
-type NewGroupsCreated @entity(immutable: true) {
+type NewGroupsCreated @entity {
   id: String!
   eventId: String!
   game: WeeklyGroupsCreated!
@@ -96,7 +97,10 @@ type NewGroupsCreated @entity(immutable: true) {
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
+  contributions: [ContributionSubmitted!]! @derivedFrom(field: "room")
+  rankings: [RankingSubmitted!]! @derivedFrom(field: "room")
 }
+
 
 type RespectUpdated @entity(immutable: true) {
   id: String!
@@ -110,7 +114,7 @@ type RespectUpdated @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
-type WeeklyGroupsCreated @entity(immutable: true) {
+type WeeklyGroupsCreated @entity {
   id: String!
   communityAndWeekId: String!
   community: Community!
@@ -135,9 +139,9 @@ type ConsensusReached @entity(immutable: true) {
 type RankingSubmitted @entity {
   id: String!
   eventId: String!
+  room: NewGroupsCreated!
   ranking: [String!]!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
-

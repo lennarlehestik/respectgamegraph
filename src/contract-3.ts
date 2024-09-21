@@ -27,6 +27,13 @@ export function handleContributionSubmitted(event: ContributionSubmittedEvent): 
   
   entity.contributionId = event.params.contributionId
 
+  // Extract room ID from contributionId
+  let parts = event.params.contributionId.split('-')
+  if (parts.length >= 3) {
+    let roomId = parts[0] + '-' + parts[1] + '-' + parts[2]
+    entity.room = roomId
+  }
+
   let contributions: string[] = []
 
   for (let i = 0; i < event.params.contributions.length; i++) {
@@ -47,7 +54,6 @@ export function handleContributionSubmitted(event: ContributionSubmittedEvent): 
 
   entity.save()
 }
-
 export function handleInitialized(event: InitializedEvent): void {
   let entity = new Initialized(
     event.transaction.hash.concatI32(event.logIndex.toI32())

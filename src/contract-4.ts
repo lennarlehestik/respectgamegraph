@@ -45,25 +45,18 @@ export function handleRankingSubmitted(event: RankingSubmittedEvent): void {
   let entity = new RankingSubmitted(entityId)
   
   entity.eventId = event.params.eventId
+
+  // Extract room ID from eventId
+  let parts = event.params.eventId.split('-')
+  if (parts.length >= 3) {
+    let roomId = parts[0] + '-' + parts[1] + '-' + parts[2]
+    entity.room = roomId
+  }
+
   entity.ranking = event.params.ranking
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
 
   entity.save()
-
-  // Extract community ID from eventId
-  let parts = event.params.eventId.split('-')
-  if (parts.length > 0) {
-    let communityId = parts[0].trim()
-    let community = Community.load(communityId)
-    if (community) {
-      // You might want to update other community data here if needed
-      community.save()
-    } else {
-      log.warning('Community not found when updating ranking submission: {}', [communityId])
-    }
-  } else {
-    log.warning('Invalid eventId format in RankingSubmitted: {}', [event.params.eventId])
-  }
 }
