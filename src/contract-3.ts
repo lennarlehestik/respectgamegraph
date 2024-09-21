@@ -20,9 +20,10 @@ import {
 } from "../generated/schema"
 import { Bytes, BigInt, log } from "@graphprotocol/graph-ts"
 import { Address } from "@graphprotocol/graph-ts"
+
 export function handleContributionSubmitted(event: ContributionSubmittedEvent): void {
   let entity = new ContributionSubmitted(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.params.contributionId
   )
   entity.contributionId = event.params.contributionId
 
@@ -65,7 +66,7 @@ export function handleNewGroupsCreated(event: NewGroupsCreatedEvent): void {
   log.debug('New groups created event detected. Transaction hash: {}', [event.transaction.hash.toHexString()])
 
   let entity = new NewGroupsCreated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.params.eventId
   )
 
   entity.eventId = event.params.eventId
@@ -100,7 +101,7 @@ export function handleOwnershipTransferred(event: OwnershipTransferredEvent): vo
 
 export function handleRespectUpdated(event: RespectUpdatedEvent): void {
   let entity = new RespectUpdated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.params.user.toHexString() + "-" + event.params.communityId.toString() + "-" + event.params.weekNumber.toString()
   )
   entity.user = event.params.user
   entity.communityId = event.params.communityId
@@ -132,7 +133,7 @@ export function handleWeeklyGroupsCreated(event: WeeklyGroupsCreatedEvent): void
   log.debug('Weekly groups created event detected. Transaction hash: {}', [event.transaction.hash.toHexString()])
 
   let entity = new WeeklyGroupsCreated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.params.communityAndWeekId
   )
 
   entity.communityAndWeekId = event.params.communityAndWeekId

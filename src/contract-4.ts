@@ -11,7 +11,7 @@ import { log, store } from '@graphprotocol/graph-ts'
 
 export function handleConsensusReached(event: ConsensusReachedEvent): void {
   let entity = new ConsensusReached(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.params.compositeId
   )
   entity.compositeId = event.params.compositeId
   entity.finalRanking = event.params.finalRanking
@@ -42,7 +42,7 @@ export function handleConsensusReached(event: ConsensusReachedEvent): void {
 
 export function handleRankingSubmitted(event: RankingSubmittedEvent): void {
   let entity = new RankingSubmitted(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.params.eventId
   )
   entity.eventId = event.params.eventId
   entity.ranking = event.params.ranking

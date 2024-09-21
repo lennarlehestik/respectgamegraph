@@ -15,7 +15,7 @@ import { BigInt } from '@graphprotocol/graph-ts'
 
 export function handleCommunityCreated(event: CommunityCreatedEvent): void {
   let entity = new CommunityCreated(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.params.communityId.toString()
   )
   entity.communityId = event.params.communityId
   entity.name = event.params.name
