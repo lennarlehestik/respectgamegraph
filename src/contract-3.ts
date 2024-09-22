@@ -21,23 +21,37 @@ import {
 import { Bytes, BigInt, log } from "@graphprotocol/graph-ts"
 import { Address } from "@graphprotocol/graph-ts"
 
+function removeSpaces(str: string): string {
+  return str.split(' ').join('');
+}
+
 export function handleContributionSubmitted(event: ContributionSubmittedEvent): void {
-  let entityId = event.params.contributionId
+  let entityId = removeSpaces(event.params.contributionId)
   let entity = new ContributionSubmitted(entityId)
   
-  entity.contributionId = event.params.contributionId
+  entity.contributionId = entityId
 
   // Extract room ID from contributionId
-  let parts = event.params.contributionId.split('-')
+  let parts = entityId.split('-')
   if (parts.length >= 3) {
-    let roomId = parts[0] + '-' + parts[1] + '-' + parts[2]
+    let roomId = parts.slice(0, 3).join('-')
     entity.room = roomId
+    
+    let room = NewGroupsCreated.load(roomId)
+    if (room) {
+      let contributionStrings = room.contributionStrings
+      contributionStrings.push(entityId)
+      room.contributionStrings = contributionStrings
+      room.save()
+    } else {
+      log.warning('Room not found when submitting contribution: {}', [roomId])
+    }
   }
 
   let contributions: string[] = []
 
   for (let i = 0; i < event.params.contributions.length; i++) {
-    let contributionId = entityId + "-" + i.toString()
+    let contributionId = removeSpaces(entityId + "-" + i.toString())
     let contribution = new Contribution(contributionId)
     contribution.name = event.params.contributions[i].name
     contribution.description = event.params.contributions[i].description
@@ -54,6 +68,7 @@ export function handleContributionSubmitted(event: ContributionSubmittedEvent): 
 
   entity.save()
 }
+
 export function handleInitialized(event: InitializedEvent): void {
   let entity = new Initialized(
     event.transaction.hash.concatI32(event.logIndex.toI32())
@@ -66,39 +81,64 @@ export function handleInitialized(event: InitializedEvent): void {
 
   entity.save()
 }
+
 export function handleNewGroupsCreated(event: NewGroupsCreatedEvent): void {
-  log.debug('New groups created event detected. Transaction hash: {}', [event.transaction.hash.toHexString()])
+  log.info('New groups created event detected. Transaction hash: {}, Event ID: {}', [event.transaction.hash.toHexString(), event.params.eventId])
 
-  let entity = new NewGroupsCreated(
-    event.params.eventId
-  )
+  let entityId = removeSpaces(event.params.eventId)
+  let entity = new NewGroupsCreated(entityId)
 
-  entity.eventId = event.params.eventId
+  entity.eventId = entityId
   entity.contributionStrings = event.params.contributionStrings
   entity.rankingStrings = event.params.rankingStrings
   entity.memberAddresses = event.params.memberAddresses
 
   // Extract game ID (communityAndWeekId) from eventId
-  let parts = event.params.eventId.split('-')
-  if (parts.length >= 2) {
-    let communityId = parts[0].trim()
-    let weekNumber = parts[1].trim()
-    let gameId = communityId + '-' + weekNumber
+  let parts = entityId.split('-')
+  if (parts.length >= 3) {
+    let communityId = parts[0]
+    let weekNumber = parts[1]
+    let gameId = removeSpaces(communityId + '-' + weekNumber)
     
     entity.game = gameId
     
     let game = WeeklyGroupsCreated.load(gameId)
-    if (game) {
-      let roomIds = game.roomIds
-      roomIds.push(event.params.eventId)
+    if (game == null) {
+      // If the game doesn't exist, create it
+      game = new WeeklyGroupsCreated(gameId)
+      game.communityAndWeekId = gameId
+      game.weekNumber = weekNumber
+      game.community = communityId
+      game.roomIds = []
+      game.roomIdentifiers = []
+      game.blockNumber = event.block.number
+      game.blockTimestamp = event.block.timestamp
+      game.transactionHash = event.transaction.hash
+      
+      // Update the community
+      let community = Community.load(communityId)
+      if (community) {
+        let games = community.games
+        if (!games.includes(gameId)) {
+          games.push(gameId)
+          community.games = games
+          community.currentGame = gameId
+          community.save()
+        }
+      }
+      
+      log.info('Created new game. Game ID: {}', [gameId])
+    }
+    
+    let roomIds = game.roomIds
+    if (!roomIds.includes(entityId)) {
+      roomIds.push(entityId)
       game.roomIds = roomIds
       game.save()
-      log.debug('Game updated with new room: {}', [gameId])
-    } else {
-      log.warning('Game not found when creating new groups: {}', [gameId])
     }
+    log.info('Game updated with new room. Game ID: {}, Room ID: {}', [gameId, entityId])
   } else {
-    log.warning('Invalid eventId format in NewGroupsCreated: {}', [event.params.eventId])
+    log.error('Invalid eventId format in NewGroupsCreated: {}', [entityId])
   }
 
   entity.blockNumber = event.block.number
@@ -107,7 +147,7 @@ export function handleNewGroupsCreated(event: NewGroupsCreatedEvent): void {
 
   entity.save()
 
-  log.debug('New groups created entity saved successfully', [])
+  log.info('New groups created entity saved successfully. Room ID: {}', [entityId])
 }
 
 export function handleOwnershipTransferred(event: OwnershipTransferredEvent): void {
@@ -125,9 +165,8 @@ export function handleOwnershipTransferred(event: OwnershipTransferredEvent): vo
 }
 
 export function handleRespectUpdated(event: RespectUpdatedEvent): void {
-  let entity = new RespectUpdated(
-    event.params.user.toHexString() + "-" + event.params.communityId.toString() + "-" + event.params.weekNumber.toString()
-  )
+  let entityId = removeSpaces(event.params.user.toHexString() + "-" + event.params.communityId.toString() + "-" + event.params.weekNumber.toString())
+  let entity = new RespectUpdated(entityId)
   entity.user = event.params.user
   entity.communityId = event.params.communityId
   entity.weekNumber = event.params.weekNumber
@@ -155,43 +194,48 @@ export function handleUpgraded(event: UpgradedEvent): void {
 }
 
 export function handleWeeklyGroupsCreated(event: WeeklyGroupsCreatedEvent): void {
-  log.debug('Weekly groups created event detected. Transaction hash: {}', [event.transaction.hash.toHexString()])
+  log.info('Weekly groups created event detected. Transaction hash: {}, Community and Week ID: {}', [event.transaction.hash.toHexString(), event.params.communityAndWeekId]);
 
-  let entity = new WeeklyGroupsCreated(
-    event.params.communityAndWeekId
-  )
+  let entityId = removeSpaces(event.params.communityAndWeekId);
+  let entity = WeeklyGroupsCreated.load(entityId);
 
-  entity.communityAndWeekId = event.params.communityAndWeekId
-  entity.roomIds = event.params.roomIds
-  entity.roomIdentifiers = event.params.roomIdentifiers
-  entity.weekNumber = event.params.weekNumber
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  // Extract community ID from communityAndWeekId
-  let parts = event.params.communityAndWeekId.split('-')
-  if (parts.length > 0) {
-    let communityId = parts[0].trim()
-    entity.community = communityId
-    
-    let community = Community.load(communityId)
-    if (community) {
-      let games = community.games
-      games.push(event.params.communityAndWeekId)
-      community.games = games
-      community.currentGame = event.params.communityAndWeekId
-      community.save()
-      log.debug('Community updated with new weekly group: {}', [communityId])
-    } else {
-      log.warning('Community not found when creating weekly groups: {}', [communityId])
-    }
-  } else {
-    log.warning('Invalid communityAndWeekId format in WeeklyGroupsCreated: {}', [event.params.communityAndWeekId])
+  if (entity == null) {
+    entity = new WeeklyGroupsCreated(entityId);
   }
 
-  entity.save()
+  entity.communityAndWeekId = entityId;
+  entity.roomIds = event.params.roomIds.map<string>((id: string) => removeSpaces(id));
+  entity.roomIdentifiers = event.params.roomIdentifiers;
+  entity.weekNumber = event.params.weekNumber;
 
-  log.debug('Weekly groups created entity saved successfully', [])
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.transactionHash = event.transaction.hash;
+
+  // Extract community ID from communityAndWeekId
+  let parts = entityId.split('-');
+  if (parts.length >= 2) {
+    let communityId = parts[0];
+    entity.community = communityId;
+    
+    let community = Community.load(communityId);
+    if (community) {
+      let games = community.games;
+      if (!games.includes(entityId)) {
+        games.push(entityId);
+        community.games = games;
+        community.currentGame = entityId;
+        community.save();
+      }
+      log.info('Community updated with weekly group. Community ID: {}, Game ID: {}', [communityId, entityId]);
+    } else {
+      log.error('Community not found when creating weekly groups. Community ID: {}', [communityId]);
+    }
+  } else {
+    log.error('Invalid communityAndWeekId format in WeeklyGroupsCreated: {}', [entityId]);
+  }
+
+  entity.save();
+
+  log.info('Weekly groups created entity saved successfully. Game ID: {}', [entityId]);
 }

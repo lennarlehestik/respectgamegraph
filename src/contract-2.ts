@@ -13,7 +13,12 @@ import {
   OwnershipTransferred,
   SubmissionToContributionTransition,
   Upgraded,
+  WeeklyGroupsCreated
 } from "../generated/schema"
+
+function removeSpaces(str: string): string {
+  return str.split(' ').join('');
+}
 
 export function handleCommunityStateChanged(event: CommunityStateChangedEvent): void {
   let entity = new CommunityStateChanged(
@@ -26,7 +31,7 @@ export function handleCommunityStateChanged(event: CommunityStateChangedEvent): 
   entity.transactionHash = event.transaction.hash
   entity.save()
 
-  let communityId = event.params.communityId.toString()
+  let communityId = removeSpaces(event.params.communityId.toString())
   let community = Community.load(communityId)
   if (community) {
     community.state = BigInt.fromI32(event.params.newState)
@@ -61,41 +66,58 @@ export function handleOwnershipTransferred(event: OwnershipTransferredEvent): vo
 }
 
 export function handleSubmissionToContributionTransition(event: SubmissionToContributionTransitionEvent): void {
-  let entity = new SubmissionToContributionTransition(
-    event.params.idWeek.toString()
-  );
+  let idWeek = removeSpaces(event.params.idWeek.toString());
   
-  log.info("FOUND IDWEEK: {}", [event.params.idWeek.toString()]);
-
-  entity.idWeek = event.params.idWeek.toString();
+  let entity = new SubmissionToContributionTransition(idWeek);
+  entity.idWeek = idWeek;
   entity.blockNumber = event.block.number;
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
   entity.save();
 
-  let parts = event.params.idWeek.toString().split('-');
+  log.info("FOUND IDWEEK: {}", [idWeek]);
 
-  if (parts.length > 0) {
-    let communityId = parts[0].trim();
+  let parts = idWeek.split('-');
+
+  if (parts.length >= 2) {
+    let communityId = parts[0];
+    let weekNumber = parts[1];
 
     log.info('Attempting to load community with ID: {}', [communityId]);
 
     let community = Community.load(communityId);
 
     if (community) {
-      let newGame = communityId + ' - ' + community.games.length.toString();
-      let games = community.games;
-      games.push(newGame);
-      community.games = games;
-      community.currentGame = newGame;
-      community.save();
+      let game = WeeklyGroupsCreated.load(idWeek);
+      if (game == null) {
+        game = new WeeklyGroupsCreated(idWeek);
+        game.communityAndWeekId = idWeek;
+        game.weekNumber = weekNumber;
+        game.community = communityId;
+        game.roomIds = [];
+        game.roomIdentifiers = [];
+        game.blockNumber = event.block.number;
+        game.blockTimestamp = event.block.timestamp;
+        game.transactionHash = event.transaction.hash;
+        game.save();
 
-      log.info('Updated games for community {}: new game {}', [communityId, newGame]);
+        let games = community.games;
+        if (!games.includes(idWeek)) {
+          games.push(idWeek);
+          community.games = games;
+          community.currentGame = idWeek;
+          community.save();
+        }
+
+        log.info('Updated games for community {}: new game {}', [communityId, idWeek]);
+      } else {
+        log.info('Game already exists for community {}: game {}', [communityId, idWeek]);
+      }
     } else {
       log.warning('Community not found when updating games for ID: {}', [communityId]);
     }
   } else {
-    log.warning('Invalid idWeek format: {}', [event.params.idWeek.toString()]);
+    log.warning('Invalid idWeek format: {}', [idWeek]);
   }
 }
 

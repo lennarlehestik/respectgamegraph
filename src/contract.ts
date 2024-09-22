@@ -13,28 +13,31 @@ import {
 } from "../generated/schema"
 import { BigInt } from '@graphprotocol/graph-ts'
 
+function removeSpaces(str: string): string {
+  return str.split(' ').join('');
+}
+
 export function handleCommunityCreated(event: CommunityCreatedEvent): void {
-  let entity = new CommunityCreated(
-    event.params.communityId.toString()
-  )
+  let communityId = removeSpaces(event.params.communityId.toString())
+  let entity = new CommunityCreated(communityId)
+  
   entity.communityId = event.params.communityId
   entity.name = event.params.name
   entity.description = event.params.description
   entity.imageUrl = event.params.imageUrl
-  entity.games = event.params.games
+  entity.games = removeSpaces(event.params.games)
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
   entity.save()
 
-  let communityId = event.params.communityId.toString()
   let community = new Community(communityId)
   community.communityId = event.params.communityId
   community.name = event.params.name
   community.description = event.params.description
   community.imageUrl = event.params.imageUrl
-  community.games = [event.params.games]
-  community.currentGame = event.params.games
+  community.games = [removeSpaces(event.params.games)]
+  community.currentGame = removeSpaces(event.params.games)
   community.state = BigInt.fromI32(0) // Set initial state to 0 as BigInt
   community.createdAt = event.block.timestamp
   community.createdAtBlock = event.block.number

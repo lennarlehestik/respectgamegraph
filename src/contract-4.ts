@@ -41,22 +41,36 @@ export function handleConsensusReached(event: ConsensusReachedEvent): void {
 }
 
 export function handleRankingSubmitted(event: RankingSubmittedEvent): void {
-  let entityId = event.params.eventId
-  let entity = new RankingSubmitted(entityId)
-  
+  let entity = new RankingSubmitted(
+    event.params.eventId
+  )
   entity.eventId = event.params.eventId
-
-  // Extract room ID from eventId
-  let parts = event.params.eventId.split('-')
-  if (parts.length >= 3) {
-    let roomId = parts[0] + '-' + parts[1] + '-' + parts[2]
-    entity.room = roomId
-  }
-
   entity.ranking = event.params.ranking
+
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+
+  // Extract community ID from eventId
+  let parts = event.params.eventId.split('-')
+  if (parts.length > 0) {
+    let communityId = parts[0].trim()
+    let community = Community.load(communityId)
+    if (community) {
+      // Update community state or other relevant data
+      // For example, you might want to increment a counter for submitted rankings
+      if (community.submittedRankingsCount) {
+        community.submittedRankingsCount = community.submittedRankingsCount + 1
+      } else {
+        community.submittedRankingsCount = 1
+      }
+      community.save()
+    } else {
+      log.warning('Community not found when updating ranking submission: {}', [communityId])
+    }
+  } else {
+    log.warning('Invalid eventId format in RankingSubmitted: {}', [event.params.eventId])
+  }
 }

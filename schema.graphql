@@ -101,7 +101,6 @@ type NewGroupsCreated @entity {
   rankings: [RankingSubmitted!]! @derivedFrom(field: "room")
 }
 
-
 type RespectUpdated @entity(immutable: true) {
   id: String!
   user: Bytes!
