@@ -209,21 +209,9 @@
 				"type": "address"
 			},
 			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "communityId",
-				"type": "uint256"
-			},
-			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "weekNumber",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "respectAmount",
+				"name": "totalRespect",
 				"type": "uint256"
 			},
 			{

@@ -8,7 +8,7 @@ dataSources:
     source:
       address: "0x589302b32b60434470C47898905eBe1ADA67E151"
       abi: Contract
-      startBlock: 19974046 
+      startBlock: 20118455 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -38,7 +38,7 @@ dataSources:
     source:
       address: "0x8F6cE0159101040045812bD646d74ef80b0C9bC8"
       abi: Contract2
-      startBlock: 19974046 
+      startBlock: 20118455 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -70,7 +70,7 @@ dataSources:
     source:
       address: "0xb51658dD0d05F4a7c038c3035f6cC839e8378c32"
       abi: Contract3
-      startBlock: 19974046
+      startBlock: 20118455
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -95,8 +95,6 @@ dataSources:
           handler: handleNewGroupsCreated
         - event: OwnershipTransferred(indexed address,indexed address)
           handler: handleOwnershipTransferred
-        - event: RespectUpdated(indexed address,indexed uint256,uint256,uint256,uint256)
-          handler: handleRespectUpdated
         - event: Upgraded(indexed address)
           handler: handleUpgraded
         - event: WeeklyGroupsCreated(string,string[],string[],string)
@@ -108,7 +106,7 @@ dataSources:
     source:
       address: "0xe0DF8059637EEB20464Faa169227DFeA819c36d7"
       abi: Contract4
-      startBlock: 19974046
+      startBlock: 20118455
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

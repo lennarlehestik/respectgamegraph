@@ -31,20 +31,28 @@ export function handleContributionSubmitted(event: ContributionSubmittedEvent): 
   
   entity.contributionId = entityId
 
-  // Extract room ID from contributionId
+  // Extract game ID from contributionId
   let parts = entityId.split('-')
-  if (parts.length >= 3) {
-    let roomId = parts.slice(0, 3).join('-')
-    entity.room = roomId
+  if (parts.length >= 2) {
+    let gameId = parts[0] + '-' + parts[1]
+    entity.game = gameId
     
-    let room = NewGroupsCreated.load(roomId)
-    if (room) {
-      let contributionStrings = room.contributionStrings
-      contributionStrings.push(entityId)
-      room.contributionStrings = contributionStrings
-      room.save()
+    let game = WeeklyGroupsCreated.load(gameId)
+    if (game) {
+      // Find the correct room for this contribution
+      for (let i = 0; i < game.roomIds.length; i++) {
+        let roomId = game.roomIds[i]
+        let room = NewGroupsCreated.load(roomId)
+        if (room && room.memberAddresses.includes(parts[2])) {
+          let contributionStrings = room.contributionStrings
+          contributionStrings.push(entityId)
+          room.contributionStrings = contributionStrings
+          room.save()
+          break
+        }
+      }
     } else {
-      log.warning('Room not found when submitting contribution: {}', [roomId])
+      log.warning('Game not found when submitting contribution: {}', [gameId])
     }
   }
 
@@ -89,8 +97,8 @@ export function handleNewGroupsCreated(event: NewGroupsCreatedEvent): void {
   let entity = new NewGroupsCreated(entityId)
 
   entity.eventId = entityId
-  entity.contributionStrings = event.params.contributionStrings
-  entity.rankingStrings = event.params.rankingStrings
+  entity.contributionStrings = []
+  entity.rankingStrings = []
   entity.memberAddresses = event.params.memberAddresses
 
   // Extract game ID (communityAndWeekId) from eventId
@@ -156,22 +164,6 @@ export function handleOwnershipTransferred(event: OwnershipTransferredEvent): vo
   )
   entity.previousOwner = event.params.previousOwner
   entity.newOwner = event.params.newOwner
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleRespectUpdated(event: RespectUpdatedEvent): void {
-  let entityId = removeSpaces(event.params.user.toHexString() + "-" + event.params.communityId.toString() + "-" + event.params.weekNumber.toString())
-  let entity = new RespectUpdated(entityId)
-  entity.user = event.params.user
-  entity.communityId = event.params.communityId
-  entity.weekNumber = event.params.weekNumber
-  entity.respectAmount = event.params.respectAmount
-  entity.averageRespect = event.params.averageRespect
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
