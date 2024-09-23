@@ -226,11 +226,39 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "_stateManagerAddress",
+				"name": "_rankingsContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_contributionsContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_multiSigContractAddress",
 				"type": "address"
 			}
 		],
-		"name": "setStateManagerAddress",
+		"name": "setContracts",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_communityId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_newTransitionTime",
+				"type": "uint256"
+			}
+		],
+		"name": "setStateTransitionTime",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -246,24 +274,6 @@
 		"name": "transferOwnership",
 		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "newImplementation",
-				"type": "address"
-			},
-			{
-				"internalType": "bytes",
-				"name": "data",
-				"type": "bytes"
-			}
-		],
-		"name": "upgradeToAndCall",
-		"outputs": [],
-		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -317,6 +327,25 @@
 			}
 		],
 		"name": "CommunityCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "communityId",
+				"type": "uint256"
+			}
+		],
+		"name": "CommunityJoined",
 		"type": "event"
 	},
 	{
@@ -386,39 +415,11 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "_rankingsContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_contributionsContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_multiSigContractAddress",
+				"name": "_stateManagerAddress",
 				"type": "address"
 			}
 		],
-		"name": "setContracts",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_communityId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_newTransitionTime",
-				"type": "uint256"
-			}
-		],
-		"name": "setStateTransitionTime",
+		"name": "setStateManagerAddress",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -435,6 +436,24 @@
 		],
 		"name": "Upgraded",
 		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newImplementation",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes",
+				"name": "data",
+				"type": "bytes"
+			}
+		],
+		"name": "upgradeToAndCall",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
 	},
 	{
 		"inputs": [

@@ -19,6 +19,8 @@ dataSources:
         - Initialized
         - OwnershipTransferred
         - Upgraded
+        - Profile
+        - ProfileCreated
       abis:
         - name: Contract
           file: ./abis/Contract.json
@@ -31,6 +33,8 @@ dataSources:
           handler: handleOwnershipTransferred
         - event: Upgraded(indexed address)
           handler: handleUpgraded
+        - event: ProfileCreated(indexed address,string,string,string)
+          handler: handleProfileCreated
       file: ./src/contract.ts
   - kind: ethereum
     name: Contract2

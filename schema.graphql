@@ -1,3 +1,24 @@
+type Profile @entity {
+  id: ID!
+  user: Bytes!
+  username: String!
+  description: String!
+  profilepic: String!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type ProfileCreated @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes!
+  username: String!
+  description: String!
+  profilepic: String!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
 type Community @entity {
   id: ID!
   communityId: BigInt!
