@@ -19,6 +19,14 @@ type ProfileCreated @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
+type RankingtoSubmission @entity(immutable: true) {
+  id: Bytes!
+  communityId: String!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
 type Community @entity {
   id: ID!
   communityId: BigInt!
@@ -34,6 +42,19 @@ type Community @entity {
   latestConsensus: String
   submittedRankingsCount: Int
   weeklyGames: [WeeklyGroupsCreated!]! @derivedFrom(field: "community")
+  memberAddresses: [Bytes!]!
+  proposals: [Proposal!]! @derivedFrom(field: "community")
+  tokenAddress: Bytes!
+  pendingMembers: [PendingMember!]! @derivedFrom(field: "community") # Add this line
+}
+
+type CommunityJoined @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes!
+  communityId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
 }
 
 type CommunityCreated @entity(immutable: true) {
@@ -43,6 +64,7 @@ type CommunityCreated @entity(immutable: true) {
   description: String!
   imageUrl: String!
   games: String!
+  tokenAddress: Bytes! # Add this line
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -161,6 +183,69 @@ type RankingSubmitted @entity {
   eventId: String!
   game: WeeklyGroupsCreated!
   ranking: [String!]!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+type Proposal @entity {
+  id: ID!
+  communityId: BigInt!
+  proposalId: BigInt!
+  proposalType: BigInt!
+  creator: Bytes!
+  amount: BigInt!
+  approvers: [Bytes!]!
+  approvalCount: Int!
+  community: Community!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type ProposalCreated @entity(immutable: true) {
+  id: Bytes!
+  communityId: BigInt!
+  proposalId: BigInt!
+  proposalType: BigInt!
+  creator: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ProposalSigned @entity(immutable: true) {
+  id: Bytes!
+  proposalId: BigInt!
+  signer: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PendingMember @entity {
+  id: ID!
+  user: Bytes!
+  communityId: BigInt!
+  community: Community! # Add this line
+  approvers: [Bytes!]
+  approvalCount: BigInt!
+  status: String!
+}
+
+type CommunityJoinApplication @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes!
+  communityId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type UserApproval @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes!
+  communityId: BigInt!
+  approver: Bytes!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

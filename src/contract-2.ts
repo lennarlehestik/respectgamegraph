@@ -15,9 +15,70 @@ import {
   Upgraded,
   WeeklyGroupsCreated
 } from "../generated/schema"
+import { RankingtoSubmission as RankingtoSubmissionEvent } from "../generated/Contract2/Contract2"
+import { RankingtoSubmission} from "../generated/schema"
 
 function removeSpaces(str: string): string {
   return str.split(' ').join('');
+}
+
+function generateGameId(communityId: string, weekNumber: string): string {
+  return communityId + "-" + weekNumber;
+}
+
+export function handleRankingtoSubmission(event: RankingtoSubmissionEvent): void {
+  let id = event.params.communityId.toString()
+  let entity = new RankingtoSubmission(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.communityId = id
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+  entity.save()
+
+  // Update community state and create new game
+  let community = Community.load(id)
+  if (community) {
+    // Change state to submission phase
+    community.state = BigInt.fromI32(0)
+
+    // Create new game
+    let currentGameId = community.currentGame
+    let currentGame = WeeklyGroupsCreated.load(currentGameId)
+    
+    if (currentGame) {
+      let currentWeekNumber = parseInt(currentGame.weekNumber) as i32
+      let nextWeekNumber = (currentWeekNumber + 1).toString()
+      let nextGameId = generateGameId(id, nextWeekNumber)
+
+      let nextGame = new WeeklyGroupsCreated(nextGameId)
+      nextGame.communityAndWeekId = nextGameId
+      nextGame.weekNumber = nextWeekNumber
+      nextGame.community = id
+      nextGame.roomIds = []
+      nextGame.roomIdentifiers = []
+      nextGame.blockNumber = event.block.number
+      nextGame.blockTimestamp = event.block.timestamp
+      nextGame.transactionHash = event.transaction.hash
+      nextGame.save()
+
+      // Update community
+      let games = community.games
+      games.push(nextGameId)
+      community.games = games
+      community.currentGame = nextGameId
+      community.submittedRankingsCount = 0 // Reset ranking count for new game
+
+      community.save()
+      
+      log.info('Updated community {} state to 0 (submission phase) and created new game {}', [id, nextGameId])
+    } else {
+      log.warning('Current game not found for community {} when transitioning to submission phase', [id])
+    }
+  } else {
+    log.warning('Community not found when updating state to submission phase: {}', [id])
+  }
 }
 
 export function handleCommunityStateChanged(event: CommunityStateChangedEvent): void {
@@ -88,6 +149,9 @@ export function handleSubmissionToContributionTransition(event: SubmissionToCont
     let community = Community.load(communityId);
 
     if (community) {
+      // Change community state to 1
+      community.state = BigInt.fromI32(1);
+
       let game = WeeklyGroupsCreated.load(idWeek);
       if (game == null) {
         game = new WeeklyGroupsCreated(idWeek);
@@ -106,13 +170,15 @@ export function handleSubmissionToContributionTransition(event: SubmissionToCont
           games.push(idWeek);
           community.games = games;
           community.currentGame = idWeek;
-          community.save();
         }
-
-        log.info('Updated games for community {}: new game {}', [communityId, idWeek]);
       } else {
         log.info('Game already exists for community {}: game {}', [communityId, idWeek]);
       }
+
+      // Save the community after all updates
+      community.save();
+
+      log.info('Updated community {}: new state 1, current game {}', [communityId, idWeek]);
     } else {
       log.warning('Community not found when updating games for ID: {}', [communityId]);
     }

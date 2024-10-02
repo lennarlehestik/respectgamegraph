@@ -8,7 +8,7 @@ dataSources:
     source:
       address: "0x589302b32b60434470C47898905eBe1ADA67E151"
       abi: Contract
-      startBlock: 20118455 
+      startBlock: 20424770 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -21,11 +21,14 @@ dataSources:
         - Upgraded
         - Profile
         - ProfileCreated
+        - CommunityJoined
+        - CommunityJoinApplication
+        - UserApproval
       abis:
         - name: Contract
           file: ./abis/Contract.json
       eventHandlers:
-        - event: CommunityCreated(indexed uint256,string,string,string,string)
+        - event: CommunityCreated(indexed uint256,string,string,string,string,indexed address)
           handler: handleCommunityCreated
         - event: Initialized(uint64)
           handler: handleInitialized
@@ -35,6 +38,12 @@ dataSources:
           handler: handleUpgraded
         - event: ProfileCreated(indexed address,string,string,string)
           handler: handleProfileCreated
+        - event: CommunityJoined(indexed address,indexed uint256)
+          handler: handleCommunityJoined
+        - event: CommunityJoinApplication(indexed address,indexed uint256)
+          handler: handleCommunityJoinApplication
+        - event: UserApproval(indexed address,indexed uint256,indexed address)
+          handler: handleUserApproval
       file: ./src/contract.ts
   - kind: ethereum
     name: Contract2
@@ -42,7 +51,7 @@ dataSources:
     source:
       address: "0x8F6cE0159101040045812bD646d74ef80b0C9bC8"
       abi: Contract2
-      startBlock: 20118455 
+      startBlock: 20424770 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -53,6 +62,7 @@ dataSources:
         - OwnershipTransferred
         - SubmissionToContributionTransition
         - Upgraded
+        - RankingtoSubmission
       abis:
         - name: Contract2
           file: ./abis/Contract2.json
@@ -67,6 +77,8 @@ dataSources:
           handler: handleSubmissionToContributionTransition
         - event: Upgraded(indexed address)
           handler: handleUpgraded
+        - event: RankingtoSubmission(string)
+          handler: handleRankingtoSubmission
       file: ./src/contract-2.ts
   - kind: ethereum
     name: Contract3
@@ -74,7 +86,7 @@ dataSources:
     source:
       address: "0xb51658dD0d05F4a7c038c3035f6cC839e8378c32"
       abi: Contract3
-      startBlock: 20118455
+      startBlock: 20424770
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -110,7 +122,7 @@ dataSources:
     source:
       address: "0xe0DF8059637EEB20464Faa169227DFeA819c36d7"
       abi: Contract4
-      startBlock: 20118455
+      startBlock: 20424770
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -127,3 +139,29 @@ dataSources:
         - event: RankingSubmitted(string,string[])
           handler: handleRankingSubmitted
       file: ./src/contract-4.ts
+  - kind: ethereum
+    name: Contract5
+    network: base
+    source:
+      address: "0x64357a6B498BC91455B5A62126A76afDb882925B"
+      abi: Contract5
+      startBlock: 20424770
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Proposal
+        - ProposalSigned
+        - ProposalExecuted
+      abis:
+        - name: Contract5
+          file: ./abis/Contract5.json
+      eventHandlers:
+        - event: PropCreated(indexed uint256,indexed uint256,uint256,indexed address,uint256)
+          handler: handlePropCreated
+        - event: ProposalSigned(indexed uint256,address)
+          handler: handleProposalSigned
+        - event: ProposalExecuted(indexed uint256,indexed uint256)
+          handler: handleProposalExecuted
+      file: ./src/contract-5.ts
